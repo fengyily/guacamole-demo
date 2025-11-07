@@ -1,0 +1,8 @@
+org/apache/guacamole/dynamic/DynamicConnectionModule.class
+org/apache/guacamole/dynamic/DynamicConnectionService.class
+org/apache/guacamole/dynamic/DynamicUserContext$1.class
+org/apache/guacamole/dynamic/DynamicConnectionServlet.class
+org/apache/guacamole/dynamic/DynamicConnectionAuthenticationProvider.class
+org/apache/guacamole/dynamic/DynamicUserContext.class
+org/apache/guacamole/dynamic/DynamicUser.class
+org/apache/guacamole/dynamic/DynamicAuthenticatedUser.class
