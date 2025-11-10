@@ -6,3 +6,4 @@ org/apache/guacamole/dynamic/DynamicConnectionAuthenticationProvider.class
 org/apache/guacamole/dynamic/DynamicUserContext.class
 org/apache/guacamole/dynamic/DynamicUser.class
 org/apache/guacamole/dynamic/DynamicAuthenticatedUser.class
+org/apache/guacamole/dynamic/DynamicRedirectServlet.class

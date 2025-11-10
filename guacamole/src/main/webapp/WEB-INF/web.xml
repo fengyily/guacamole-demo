@@ -4,15 +4,15 @@
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee 
          http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
 
-    <!-- 动态连接Servlet -->
+    <!-- 动态连接重定向Servlet -->
     <servlet>
-        <servlet-name>DynamicConnectionServlet</servlet-name>
-        <servlet-class>org.apache.guacamole.dynamic.DynamicConnectionServlet</servlet-class>
+        <servlet-name>DynamicRedirectServlet</servlet-name>
+        <servlet-class>org.apache.guacamole.dynamic.DynamicRedirectServlet</servlet-class>
     </servlet>
 
     <servlet-mapping>
-        <servlet-name>DynamicConnectionServlet</servlet-name>
-        <url-pattern>/dynamic</url-pattern>
+        <servlet-name>DynamicRedirectServlet</servlet-name>
+        <url-pattern>/dynamic/connect</url-pattern>
     </servlet-mapping>
 
 </web-app>
