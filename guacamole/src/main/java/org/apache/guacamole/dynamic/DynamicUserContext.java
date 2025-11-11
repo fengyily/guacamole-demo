@@ -20,11 +20,22 @@ public class DynamicUserContext extends AbstractUserContext {
     private final Set<ConnectionGroup> connectionGroups = new HashSet<>();
     private String dynamicConnectionId = null;
 
+    // 原有构造函数（向后兼容）
     public DynamicUserContext(AuthenticatedUser authenticatedUser, DynamicConnectionService dynamicService) 
             throws GuacamoleException {
         this.authenticatedUser = authenticatedUser;
         this.dynamicService = dynamicService;
         createDynamicConnection();
+        createRootConnectionGroup();
+    }
+
+    // 🔥 新增构造函数：接受连接数据
+    public DynamicUserContext(AuthenticatedUser authenticatedUser, DynamicConnectionService dynamicService,
+                            DynamicConnectionAuthenticationProvider.ConnectionData connData) 
+            throws GuacamoleException {
+        this.authenticatedUser = authenticatedUser;
+        this.dynamicService = dynamicService;
+        createDynamicConnectionFromData(connData);
         createRootConnectionGroup();
     }
 
@@ -69,6 +80,59 @@ public class DynamicUserContext extends AbstractUserContext {
         System.out.println("✅ Created ROOT connection group");
     }
 
+    // 🔥 新增方法：从连接数据创建动态连接
+    private void createDynamicConnectionFromData(DynamicConnectionAuthenticationProvider.ConnectionData connData) 
+            throws GuacamoleException {
+        
+        if (connData.protocol == null || connData.hostname == null) {
+            throw new GuacamoleException("Missing required parameters: protocol and hostname");
+        }
+
+        System.out.println("🎯 Creating dynamic connection from connection data:");
+        System.out.println("   Protocol: " + connData.protocol);
+        System.out.println("   Hostname: " + connData.hostname);
+        System.out.println("   Port: " + connData.port);
+        System.out.println("   Username: " + connData.username);
+
+        // 创建配置
+        GuacamoleConfiguration config = new GuacamoleConfiguration();
+        config.setProtocol(connData.protocol);
+        config.setParameter("hostname", connData.hostname);
+        config.setParameter("port", String.valueOf(connData.port));
+        
+        if (connData.username != null) config.setParameter("username", connData.username);
+        if (connData.password != null) config.setParameter("password", connData.password);
+
+        // 设置协议特定参数
+        configureProtocolSpecificParameters(config, connData.protocol);
+
+        // 使用 DynamicConnectionService 创建连接 ID 和存储配置
+        String connectionId = dynamicService.createDynamicConnection(config);
+        this.dynamicConnectionId = connectionId;
+        
+        // 创建连接对象
+        SimpleConnection connection = new SimpleConnection(connectionId, connectionId, config, true);
+        connection.setName("Dynamic - " + connData.protocol.toUpperCase() + " to " + connData.hostname);
+        connection.setParentIdentifier("ROOT");
+        
+        connections.put(connectionId, connection);
+        
+        System.out.println("✅✅✅ SUCCESS: Created dynamic connection from data:");
+        System.out.println("   Name: " + connection.getName());
+        System.out.println("   ID: " + connection.getIdentifier());
+        System.out.println("   Parent: " + connection.getParentIdentifier());
+        System.out.println("   Protocol: " + connData.protocol);
+        
+        // 验证连接是否正确存储
+        Connection storedConn = connections.get(connectionId);
+        if (storedConn != null) {
+            System.out.println("✅ Verification: Connection successfully stored with ID: " + storedConn.getIdentifier());
+        } else {
+            System.out.println("❌ Verification FAILED: Connection not found in map!");
+        }
+    }
+
+    // 原有方法：从HTTP参数创建动态连接
     private void createDynamicConnection() throws GuacamoleException {
         HttpServletRequest request = authenticatedUser.getCredentials().getRequest();
         String protocol = request.getParameter("protocol");
@@ -81,7 +145,7 @@ public class DynamicUserContext extends AbstractUserContext {
             throw new GuacamoleException("Missing required parameters: protocol and hostname");
         }
 
-        System.out.println("🎯 Creating dynamic connection:");
+        System.out.println("🎯 Creating dynamic connection from HTTP parameters:");
         System.out.println("   Protocol: " + protocol);
         System.out.println("   Hostname: " + hostname);
         System.out.println("   Port: " + (port != null ? port : getDefaultPort(protocol)));

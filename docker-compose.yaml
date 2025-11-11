@@ -14,6 +14,7 @@ services:
     environment:
       - GUACAMOLE_HOME=/opt/guacamole
       - GUACAMOLE_PORT=8890
+      - GUACAMOLE_ENCRYPTION_KEY=xssssxsssssssxsssssssxssssssssxs
     ports:
       - "8890:8080"  # 这个映射仍然需要
     depends_on:
@@ -22,3 +23,17 @@ services:
       - ./extensions:/opt/guacamole/extensions
       - ./lib:/opt/guacamole/lib
       - ./etc/guacamole.properties:/opt/guacamole/guacamole.properties:ro
+
+  desktop:
+    image: dorowu/ubuntu-desktop-lxde-vnc
+    container_name: vnc-desktop
+    ports:
+      - "6080:80"      # Web VNC 客户端
+      - "5900:5900"    # VNC 端口
+      - "3389:3389"    # RDP 端口
+    environment:
+      - VNC_PASSWORD=password123
+      - RESOLUTION=1920x1080
+    volumes:
+      - ./data:/root
+    restart: unless-stopped

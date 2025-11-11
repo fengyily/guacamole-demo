@@ -12,10 +12,18 @@ public class DynamicAuthenticatedUser implements AuthenticatedUser {
     private final Credentials credentials;
     private final AuthenticationProvider authProvider;
     private String identifier = "dynamic-user";
+    private DynamicConnectionAuthenticationProvider.ConnectionData connectionData;
 
     public DynamicAuthenticatedUser(Credentials credentials, AuthenticationProvider authProvider) {
         this.credentials = credentials;
         this.authProvider = authProvider;
+    }
+
+    public DynamicAuthenticatedUser(Credentials credentials, AuthenticationProvider authProvider, 
+                                   DynamicConnectionAuthenticationProvider.ConnectionData connectionData) {
+        this.credentials = credentials;
+        this.authProvider = authProvider;
+        this.connectionData = connectionData;
     }
 
     @Override 
@@ -46,6 +54,10 @@ public class DynamicAuthenticatedUser implements AuthenticatedUser {
     @Override
     public Set<String> getEffectiveUserGroups() {
         return Collections.emptySet();
+    }
+    
+    public DynamicConnectionAuthenticationProvider.ConnectionData getConnectionData() {
+        return connectionData;
     }
     
     @Override
