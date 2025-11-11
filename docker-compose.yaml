@@ -17,7 +17,7 @@ services:
     environment:
       - GUACAMOLE_HOME=/opt/guacamole
     ports:
-      - "8889:8080"
+      - "8890:8080"
     depends_on:
       - guacd
     volumes:
