@@ -10,15 +10,13 @@ import org.apache.guacamole.net.auth.simple.SimpleUser;
 import org.apache.guacamole.protocol.GuacamoleConfiguration;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.*;
 
 public class DynamicUserContext extends AbstractUserContext {
 
     private final AuthenticatedUser authenticatedUser;
     private final DynamicConnectionService dynamicService;
-    private final Set<Connection> connections = new HashSet<>();
+    private final Map<String, Connection> connections = new HashMap<>();
     private final Set<ConnectionGroup> connectionGroups = new HashSet<>();
     private String dynamicConnectionId = null;
 
@@ -45,19 +43,13 @@ public class DynamicUserContext extends AbstractUserContext {
         return authenticatedUser.getAuthenticationProvider();
     }
 
-    // 🔥 关键修复：使用正确的 ConnectionDirectory 实现 🔥
     @Override
     public org.apache.guacamole.net.auth.Directory<Connection> getConnectionDirectory() throws GuacamoleException {
-        // 在返回目录前确保连接存在
-        refreshConnections();
-        
         System.out.println("🎯 getConnectionDirectory() called, connections count: " + connections.size());
-        for (Connection conn : connections) {
+        for (Connection conn : connections.values()) {
             System.out.println("   Connection: " + conn.getName() + " (ID: " + conn.getIdentifier() + ")");
         }
-        
-        // 创建自定义的 ConnectionDirectory 来处理连接检索
-        return new CustomConnectionDirectory(connections, dynamicService);
+        return new DynamicConnectionDirectory(connections, dynamicService);
     }
 
     @Override
@@ -111,43 +103,27 @@ public class DynamicUserContext extends AbstractUserContext {
         String connectionId = dynamicService.createDynamicConnection(config);
         this.dynamicConnectionId = connectionId;
         
-        // 刷新连接集合
-        refreshConnections();
+        // 🔥🔥🔥 关键修复：确保使用正确的连接ID创建连接对象 🔥🔥🔥
+        SimpleConnection connection = new SimpleConnection(connectionId, connectionId, config, true);
+        connection.setName("Dynamic - " + protocol.toUpperCase() + " to " + hostname);
+        connection.setParentIdentifier("ROOT");
+        
+        connections.put(connectionId, connection);
         
         System.out.println("✅✅✅ SUCCESS: Created dynamic connection:");
-        System.out.println("   Name: Dynamic - " + protocol.toUpperCase() + " to " + hostname);
-        System.out.println("   ID: " + connectionId);
-        System.out.println("   Parent: ROOT");
+        System.out.println("   Name: " + connection.getName());
+        System.out.println("   ID: " + connection.getIdentifier()); // 这里应该是动态ID
+        System.out.println("   Parent: " + connection.getParentIdentifier());
         System.out.println("   Protocol: " + protocol);
-    }
-
-    /**
-     * 刷新连接集合
-     */
-    private void refreshConnections() {
-        connections.clear();
+        System.out.println("   Stored in connections map with key: " + connectionId);
         
-        if (dynamicConnectionId != null) {
-            try {
-                GuacamoleConfiguration config = dynamicService.getConfiguration(dynamicConnectionId);
-                if (config != null) {
-                    SimpleConnection connection = new SimpleConnection(dynamicConnectionId, "ROOT", config, true);
-                    connection.setName("Dynamic - " + config.getProtocol().toUpperCase() + " to " + config.getParameter("hostname"));
-                    connection.setParentIdentifier("ROOT");
-                    connections.add(connection);
-                    System.out.println("🔄 Refreshed connection: " + connection.getName());
-                }
-            } catch (GuacamoleException e) {
-                System.out.println("❌ Error refreshing connection: " + e.getMessage());
-            }
+        // 验证连接是否正确存储
+        Connection storedConn = connections.get(connectionId);
+        if (storedConn != null) {
+            System.out.println("✅ Verification: Connection successfully stored with ID: " + storedConn.getIdentifier());
+        } else {
+            System.out.println("❌ Verification FAILED: Connection not found in map!");
         }
-    }
-
-    /**
-     * 获取动态连接ID
-     */
-    public String getDynamicConnectionId() {
-        return dynamicConnectionId;
     }
 
     private String getDefaultPort(String protocol) {
@@ -176,39 +152,53 @@ public class DynamicUserContext extends AbstractUserContext {
         }
     }
 
-    // 🔥 自定义 ConnectionDirectory 来处理连接检索 🔥
-    private class CustomConnectionDirectory extends SimpleConnectionDirectory {
-        
+    private static class DynamicConnectionDirectory extends SimpleConnectionDirectory {
+    
+        private final Map<String, Connection> connectionMap;
         private final DynamicConnectionService dynamicService;
         
-        public CustomConnectionDirectory(Collection<Connection> connections, DynamicConnectionService dynamicService) {
-            super(connections);
+        public DynamicConnectionDirectory(Map<String, Connection> connectionMap, DynamicConnectionService dynamicService) {
+            super(connectionMap.values());
+            this.connectionMap = connectionMap;
             this.dynamicService = dynamicService;
         }
         
         @Override
         public Connection get(String identifier) throws GuacamoleException {
-            System.out.println("🔍 CustomConnectionDirectory.get() called for ID: " + identifier);
+            System.out.println("🔍 DynamicConnectionDirectory.get() called for ID: " + identifier);
+            System.out.println("   Available connections in map: " + connectionMap.keySet());
             
-            // 首先尝试从父类获取
-            Connection connection = super.get(identifier);
+            // 🚨 关键修复：首先检查连接是否存在
+            if (!dynamicService.connectionExists(identifier)) {
+                System.out.println("❌ Connection does not exist in service: " + identifier);
+                return null;
+            }
+            
+            // 首先从连接映射中查找
+            Connection connection = connectionMap.get(identifier);
             if (connection != null) {
-                System.out.println("✅ Found connection in directory: " + connection.getName());
+                System.out.println("✅ Found connection in map: " + connection.getName() + " (ID: " + identifier + ")");
                 return connection;
             }
             
-            // 如果父类没有找到，尝试从 dynamicService 获取
+            // 如果没找到，从动态服务创建
             try {
+                System.out.println("🔄 Creating connection from dynamic service: " + identifier);
                 GuacamoleConfiguration config = dynamicService.getConfiguration(identifier);
                 if (config != null) {
-                    SimpleConnection dynamicConnection = new SimpleConnection(identifier, "ROOT", config, true);
+                    SimpleConnection dynamicConnection = new SimpleConnection(identifier, identifier, config, true);
                     dynamicConnection.setName("Dynamic - " + config.getProtocol().toUpperCase() + " to " + config.getParameter("hostname"));
                     dynamicConnection.setParentIdentifier("ROOT");
-                    System.out.println("✅✅✅ SUCCESS: Retrieved dynamic connection: " + dynamicConnection.getName());
+                    
+                    // 🚨 关键：添加到映射中以便后续使用
+                    connectionMap.put(identifier, dynamicConnection);
+                    
+                    System.out.println("✅✅✅ SUCCESS: Created and returned dynamic connection: " + dynamicConnection.getName());
                     return dynamicConnection;
                 }
             } catch (GuacamoleException e) {
-                System.out.println("❌ Connection not found in dynamic service: " + identifier);
+                System.out.println("❌ Failed to create dynamic connection " + identifier + ": " + e.getMessage());
+                e.printStackTrace();
             }
             
             System.out.println("❌ Connection not found: " + identifier);
