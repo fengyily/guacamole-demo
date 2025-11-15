@@ -1,0 +1,76 @@
+<div class="login-ui" ng-class="{error: loginError, continuation: isContinuation(), initial: !isContinuation()}" >
+
+    <!-- Login error message -->
+    <p class="login-error" translate="{{loginError.key}}"
+       translate-values="{{loginError.variables}}"></p>
+
+    <div class="login-dialog-middle">
+
+        <div class="login-dialog notification">
+
+            <form class="login-form" ng-submit="login()">
+
+                <!-- Custom Logo and Title -->
+                <div class="logo">
+                    <h1>WebGate 远程桌面网关</h1>
+                    <p class="subtitle">安全访问您的远程桌面</p>
+                </div>
+                <div class="version">
+                    <div class="app-name">{{'APP.NAME' | translate}}</div>
+                    <div class="version-number">{{'APP.VERSION' | translate}}</div>
+                </div>
+
+                <!-- Login message/instructions -->
+                <p ng-show="helpText" translate="{{helpText.key}}"
+                   translate-values="{{helpText.variables}}"></p>
+
+                <!-- Token authentication field -->
+                <div class="token-section" ng-if="showTokenField">
+                    <div class="token-field">
+                        <label for="token-input">访问令牌</label>
+                        <input type="text" id="token-input" name="token" 
+                               ng-model="enteredValues.token" 
+                               placeholder="请输入您的访问令牌"
+                               ng-disabled="submitted">
+                        <p class="token-help">请输入系统管理员提供的访问令牌</p>
+                    </div>
+                </div>
+
+                <!-- Login fields -->
+                <div class="login-fields">
+                    <guac-form
+                        namespace="'LOGIN'"
+                        content="remainingFields"
+                        model="enteredValues"
+                        focused="relevantField.name"
+                        data-disabled="submitted"></guac-form>
+                </div>
+
+                <!-- Login/continue button -->
+                <div class="buttons">
+
+                    <input type="submit" name="login" class="login"
+                           ng-disabled="submitted"
+                           value="{{'LOGIN.ACTION_LOGIN' | translate}}">
+
+                    <input type="submit" name="login" class="continue-login"
+                           ng-disabled="submitted"
+                           value="{{'LOGIN.ACTION_CONTINUE' | translate}}">
+
+                </div>
+
+                <!-- Additional authentication options -->
+                <div class="auth-options">
+                    <button type="button" class="auth-toggle" 
+                            ng-click="toggleAuthMode()">
+                        {{ showTokenField ? '使用用户名密码登录' : '使用令牌登录' }}
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>

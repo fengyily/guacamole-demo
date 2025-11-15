@@ -28,8 +28,11 @@ ARG MAVEN_ARGUMENTS="-DskipTests=true -DignoreLicenseErrors=true"
 # Set build environment
 ENV BUILD_DIR=/tmp/guacamole-build
 
-# Copy the entire guacamole-client source code
-COPY guacamole-client/ $BUILD_DIR/
+# Copy the entire guacamole-client source code from parent directory
+COPY ../guacamole-client/ $BUILD_DIR/
+
+# Copy custom frontend files to override default login page
+COPY src/main/resources/custom-frontend/ $BUILD_DIR/guacamole/src/main/frontend/src/app/login/templates/
 
 # Change to build directory and run maven build
 WORKDIR $BUILD_DIR
@@ -45,8 +48,8 @@ ARG MAVEN_ARGUMENTS="-DskipTests=true"
 # Set build environment
 ENV BUILD_DIR=/tmp/guacamole-build
 
-# Copy the entire guacamole-client source code
-COPY guacamole/ $BUILD_DIR/
+# Copy the current guacamole module source code
+COPY . $BUILD_DIR/
 
 # Change to build directory and run maven build
 WORKDIR $BUILD_DIR

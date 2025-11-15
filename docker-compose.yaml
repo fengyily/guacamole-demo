@@ -6,7 +6,7 @@ services:
     network_mode: "host"  # 使用宿主机网络
 
   guacamole:
-    image: guacamole/guacamole:latest
+    image: guacamole-custom:latest
     container_name: guacamole
     restart: unless-stopped
     network_mode: "host"  # guacamole 也使用宿主机网络

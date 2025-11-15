@@ -1,0 +1,131 @@
+.login-ui .login-dialog .logo h1 {
+    color: #2c3e50;
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    text-align: center;
+}
+
+.login-ui .login-dialog .logo .subtitle {
+    color: #7f8c8d;
+    font-size: 14px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.login-ui .login-dialog .token-section {
+    margin: 20px 0;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.login-ui .login-dialog .token-field label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.login-ui .login-dialog .token-field input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.login-ui .login-dialog .token-field input:focus {
+    border-color: #3498db;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+.login-ui .login-dialog .token-help {
+    font-size: 12px;
+    color: #7f8c8d;
+    margin-top: 5px;
+    margin-bottom: 0;
+}
+
+.login-ui .login-dialog .auth-options {
+    margin-top: 15px;
+    text-align: center;
+}
+
+.login-ui .login-dialog .auth-toggle {
+    background: none;
+    border: none;
+    color: #3498db;
+    cursor: pointer;
+    font-size: 13px;
+    text-decoration: underline;
+}
+
+.login-ui .login-dialog .auth-toggle:hover {
+    color: #2980b9;
+}
+
+/* Enhanced styling for the login form */
+.login-ui .login-dialog {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e0e0e0;
+}
+
+.login-ui .login-dialog .version {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.login-ui .login-dialog .version .app-name {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.login-ui .login-dialog .version .version-number {
+    font-size: 12px;
+    opacity: 0.9;
+}
+
+.login-ui .login-dialog .buttons input[type="submit"] {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 6px;
+    color: white;
+    font-weight: 600;
+    padding: 12px 24px;
+    transition: all 0.3s ease;
+}
+
+.login-ui .login-dialog .buttons input[type="submit"]:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.login-ui .login-dialog .buttons input[type="submit"]:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Responsive design */
+@media (max-width: 480px) {
+    .login-ui .login-dialog {
+        margin: 10px;
+        padding: 20px;
+    }
+    
+    .login-ui .login-dialog .logo h1 {
+        font-size: 20px;
+    }
+    
+    .login-ui .login-dialog .token-section {
+        padding: 10px;
+    }
+}

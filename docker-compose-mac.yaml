@@ -8,7 +8,7 @@ services:
     network_mode: "host"  # 🚨 使用宿主机网络
 
   guacamole:
-    image: guacamole-with-dynamic-plugin:latest
+    image: guacamole-custom:latest
     container_name: guacamole
     restart: unless-stopped
     environment:
