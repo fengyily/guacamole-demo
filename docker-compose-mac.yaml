@@ -8,7 +8,7 @@ services:
     network_mode: "host"  # 🚨 使用宿主机网络
 
   guacamole:
-    image: guacamole/guacamole:latest
+    image: guacamole-with-dynamic-plugin:latest
     container_name: guacamole
     restart: unless-stopped
     environment:
@@ -20,7 +20,6 @@ services:
     depends_on:
       - guacd
     volumes:
-      - ./extensions:/opt/guacamole/extensions
       - ./lib:/opt/guacamole/lib
       - ./etc/guacamole.properties:/opt/guacamole/guacamole.properties:ro
 
@@ -43,7 +42,7 @@ services:
     container_name: nginx-proxy
     restart: unless-stopped
     ports:
-      - "80:8890"  # 这个映射仍然需要
+      - "80:80"  # 映射宿主机80端口到容器80端口
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
